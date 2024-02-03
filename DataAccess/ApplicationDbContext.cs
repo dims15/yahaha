@@ -4,7 +4,7 @@ using WebApplication1.Entities;
 
 namespace WebApplication1.DataAccess
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         //public DbSet<User> Users { get; set; }
 

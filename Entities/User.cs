@@ -1,8 +1,9 @@
-﻿namespace WebApplication1.Entities
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace WebApplication1.Entities
 {
-    public class Login
+    public class User : IdentityUser
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string Phone { get; set; }
     }
 }

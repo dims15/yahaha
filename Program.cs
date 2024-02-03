@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApplication1.DataAccess;
+using WebApplication1.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     );
 });
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 

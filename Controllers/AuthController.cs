@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WebApplication1.Entities;
 using WebApplication1.Model;
 
 namespace WebApplication1.Controllers
@@ -12,17 +13,21 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<IdentityUser> userManager)
+        public AuthController(
+            UserManager<User> userManager,
+            IConfiguration configuration)
         {
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            var user = new User { UserName = model.Email, Email = model.Email, Phone = model.Phone };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
@@ -47,22 +52,22 @@ namespace WebApplication1.Controllers
             return Unauthorized(new { Message = "Invalid credentials" });
         }
 
-        private string GenerateJwtToken(IdentityUser user)
+        private string GenerateJwtToken(User user)
         {
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName),
-            // Add additional claims as needed
-        };
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                // Add additional claims as needed
+            };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secret-key"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now.AddHours(2);
 
             var token = new JwtSecurityToken(
-                "your-issuer",
-                "your-audience",
+                _configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
                 claims,
                 expires: expires,
                 signingCredentials: credentials
@@ -70,5 +75,6 @@ namespace WebApplication1.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }
